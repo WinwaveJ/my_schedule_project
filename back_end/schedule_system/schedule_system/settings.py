@@ -53,11 +53,19 @@ INSTALLED_APPS = [
     "settings.apps.SettingsConfig",  # 系统设置模块
 ]
 
+from rest_framework_simplejwt.settings import api_settings
+
+# 修改 USER_ID_FIELD 配置
+api_settings.USER_ID_FIELD = "user_id"
+
 # 配置 DRF 认证方式
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-    )
+    ),
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
 }
 
 # 配置 JWT 参数（可选但推荐）

@@ -1,1 +1,8 @@
-back_end/venv/
+# 忽略 Python 缓存文件夹
+__pycache__/
+
+# 你还可以添加其他忽略规则，例如：
+# 忽略虚拟环境文件夹
+venv/
+# 忽略 .pyc 文件
+*.pyc
