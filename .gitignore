@@ -4,5 +4,7 @@ __pycache__/
 # 你还可以添加其他忽略规则，例如：
 # 忽略虚拟环境文件夹
 venv/
-# 忽略 .pyc 文件
+# 忽略所有.pyc 文件
 *.pyc
+# 忽略所有 .DS_Store 文件
+.DS_Store
