@@ -49,8 +49,8 @@ INSTALLED_APPS = [
     "activities.apps.ActivitiesConfig",  # 活动管理模块
     "reminders.apps.RemindersConfig",  # 提醒管理模块
     "data_stats.apps.DataStatsConfig",  # 统计分析模块
-    "backups.apps.BackupsConfig",  # 数据备份模块
-    "settings.apps.SettingsConfig",  # 系统设置模块
+    "data_backups.apps.BackupsConfig",  # 数据备份模块
+    "app_settings.apps.SettingsConfig",  # 系统设置模块
 ]
 
 from rest_framework_simplejwt.settings import api_settings
