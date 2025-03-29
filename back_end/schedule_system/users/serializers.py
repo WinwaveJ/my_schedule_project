@@ -11,13 +11,14 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["username", "email", "password"]
+        extra_kwargs = {"password": {"write_only": True}}
 
-    # def validate_password(self, value):
-    #     try:
-    #         validate_password(value)  # 使用 Django 内置的密码验证
-    #     except ValidationError as e:
-    #         raise serializers.ValidationError(str(e))
-    #     return value
+    def validate_password(self, value):
+        try:
+            validate_password(value)  # 使用 Django 内置的密码验证
+        except ValidationError as e:
+            raise serializers.ValidationError(str(e))
+        return value
 
     def create(self, validated_data):
         user = User.objects.create_user(
@@ -45,7 +46,7 @@ class UserLoginSerializer(serializers.Serializer):
                 return user
             else:
                 raise serializers.ValidationError(
-                    "Unable to log in with provided credentials."
+                    "Unable to log in with provided credentials.", code="unauthorized"
                 )
         else:
             raise serializers.ValidationError("Must include 'username' and 'password'.")
@@ -71,5 +72,8 @@ class ChangePasswordSerializer(serializers.Serializer):
     new_password = serializers.CharField(write_only=True)
 
     def validate_new_password(self, value):
-        # 复用密码验证
-        return UserRegistrationSerializer().validate_password(value)
+        try:
+            validate_password(value)  # 使用 Django 内置的密码验证
+        except ValidationError as e:
+            raise serializers.ValidationError(str(e))
+        return value
