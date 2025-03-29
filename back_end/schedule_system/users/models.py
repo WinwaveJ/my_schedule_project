@@ -10,6 +10,9 @@ class UserManager(BaseUserManager):
         if not email:
             raise ValueError("The Email field must be set")
         email = self.normalize_email(email)
+        # 确保用户名大小写敏感
+        if self.filter(username__exact=username).exists():
+            raise ValueError("A user with that username already exists.")
         user = self.model(username=username, email=email)
         user.set_password(password)
         user.save(using=self._db)
@@ -21,11 +24,19 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
+    def get_by_natural_key(self, username):
+        # 重写此方法以确保用户名大小写敏感
+        return self.get(username__exact=username)
+
 
 # 自定义用户模型
 class User(AbstractBaseUser):
     user_id = models.AutoField(primary_key=True)  # 用户ID
-    username = models.CharField(max_length=50, unique=True)  # 用户名
+    username = models.CharField(
+        max_length=50,
+        unique=True,
+        db_collation='utf8_bin'  # 使用区分大小写的排序规则
+    )  # 用户名
     email = models.EmailField(unique=True)  # 邮箱
     # password_hash = models.CharField(max_length=255)  # 加密后的密码
     role = models.CharField(
@@ -44,10 +55,24 @@ class User(AbstractBaseUser):
 
     objects = UserManager()
 
+    class Meta:
+        # 添加数据库约束以确保用户名大小写敏感
+        db_table = 'users_user'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['username'],
+                name='case_sensitive_username'
+            )
+        ]
+
     # 添加 id 属性作为 user_id 的别名
     @property
     def id(self):
         return self.user_id
+
+    def save(self, *args, **kwargs):
+        self.email = self.email.lower()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.username

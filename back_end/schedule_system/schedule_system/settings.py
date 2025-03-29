@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     # 第三方库
     "rest_framework",  # REST API 支持，对应 PyPI 包名 djangorestframework
     "rest_framework_simplejwt",  # JWT 认证，对应 PyPI 包名 djangorestframework-simplejwt
+    "corsheaders",  # CORS支持
     # 本地应用
     "users.apps.UsersConfig",  # 用户管理模块（使用应用配置类）
     "tasks.apps.TasksConfig",  # 任务管理模块
@@ -80,6 +81,7 @@ SIMPLE_JWT = {
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",  # 添加CORS中间件
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -116,9 +118,11 @@ DATABASES = {
         # 'ENGINE': 'django.db.backends.sqlite3',
         # 'NAME': BASE_DIR / 'db.sqlite3',
         "ENGINE": "django.db.backends.mysql",  # 数据库引擎
-        "NAME": "schedule_system",  # 数据库名
-        "USER": "django_user",  # 用户名
-        "PASSWORD": "jackie1004",  # 密码
+        "NAME": "new",  # 数据库名
+        # "USER": "django_user",  # 用户名
+        # "PASSWORD": "jackie1004",  # 密码
+        "USER": "root",
+        "PASSWORD": "wjh20021004",
         "HOST": "localhost",  # 数据库主机（默认本地）
         "PORT": "3306",  # 数据库端口（默认3306）
     }
@@ -165,3 +169,38 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# CORS配置
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # Vite开发服务器
+    "http://127.0.0.1:5173",
+]
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'Access-Control-Allow-Origin',
+    'Access-Control-Allow-Headers',
+    'Access-Control-Allow-Methods',
+    'Access-Control-Allow-Credentials',
+]
+CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
+CORS_PREFLIGHT_MAX_AGE = 86400  # 24小时
+
+# 允许所有域名访问（仅用于开发环境）
+CORS_ALLOW_ALL_ORIGINS = True

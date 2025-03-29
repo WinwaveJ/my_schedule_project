@@ -20,6 +20,16 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(str(e))
         return value
 
+    def validate_username(self, value):
+        if not value:
+            raise serializers.ValidationError("用户名不能为空")
+        return value
+
+    def validate_email(self, value):
+        if not value:
+            raise serializers.ValidationError("邮箱不能为空")
+        return value
+
     def create(self, validated_data):
         user = User.objects.create_user(
             username=validated_data["username"],
@@ -31,23 +41,39 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
 # 用户登录序列化器
 class UserLoginSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    password = serializers.CharField()
+    username = serializers.CharField(error_messages={
+        'blank': '用户名不能为空',
+        'required': '用户名不能为空'
+    })
+    password = serializers.CharField(error_messages={
+        'blank': '密码不能为空',
+        'required': '密码不能为空'
+    })
 
     def validate(self, data):
         username = data.get("username")
         password = data.get("password")
 
         if username and password:
-            user = authenticate(username=username, password=password)
-            if user:
-                if not user.is_active:
-                    raise serializers.ValidationError("User account is disabled.")
-                return user
-            else:
+            # 使用精确匹配查找用户
+            try:
+                # 区分大小写查找用户
+                user = User.objects.get(username__exact=username)
+            except User.DoesNotExist:
                 raise serializers.ValidationError(
                     "Unable to log in with provided credentials.", code="unauthorized"
                 )
+
+            # 验证密码
+            if not user.check_password(password):
+                raise serializers.ValidationError(
+                    "Unable to log in with provided credentials.", code="unauthorized"
+                )
+
+            if not user.is_active:
+                raise serializers.ValidationError("User account is disabled.")
+
+            return user
         else:
             raise serializers.ValidationError("Must include 'username' and 'password'.")
 
@@ -59,11 +85,20 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         fields = [
             "username",
             "email",
+            "created_at",
+            "last_login"
         ]  # 可以扩展更多字段
         extra_kwargs = {
             "username": {"required": False},
             "email": {"required": False},
+            "created_at": {"read_only": True},
+            "last_login": {"read_only": True}
         }
+
+    def validate_email(self, value):
+        if not value:
+            raise serializers.ValidationError("邮箱不能为空")
+        return value
 
 
 # 用户密码修改序列化器
@@ -71,9 +106,21 @@ class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(write_only=True)
     new_password = serializers.CharField(write_only=True)
 
+    def validate_old_password(self, value):
+        if not value:
+            raise serializers.ValidationError("旧密码不能为空")
+        return value
+
     def validate_new_password(self, value):
+        if not value:
+            raise serializers.ValidationError("新密码不能为空")
         try:
             validate_password(value)  # 使用 Django 内置的密码验证
         except ValidationError as e:
             raise serializers.ValidationError(str(e))
         return value
+
+    def validate(self, data):
+        if data["old_password"] == data["new_password"]:
+            raise serializers.ValidationError("新密码不能与旧密码相同")
+        return data

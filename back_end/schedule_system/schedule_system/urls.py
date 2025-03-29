@@ -21,4 +21,10 @@ from django.urls import path, include
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/users/", include("users.urls")),  # 添加用户模块的路由
+    path("api/", include("tasks.urls")),  # 添加任务模块的路由
+    path("api/", include("activities.urls")),  # 添加活动模块的路由
+    path("api/", include("app_settings.urls")),  # 添加应用设置模块的路由
+    path("api/", include("reminders.urls")),  # 添加提醒模块的路由
+    path("api/", include("data_stats.urls")),  # 添加数据统计模块的路由
+    path("api/", include("data_backups.urls")),  # 添加数据备份模块的路由
 ]

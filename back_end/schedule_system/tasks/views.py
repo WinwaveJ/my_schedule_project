@@ -6,8 +6,8 @@ from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
 from django.utils import timezone
 from django.db import transaction
-from .models import Task, TaskTag
-from .serializers import TaskSerializer, TaskTagSerializer
+from .models import Task
+from .serializers import TaskSerializer
 
 # Create your views here.
 
@@ -19,11 +19,10 @@ class TaskViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = Task.objects.filter(user=self.request.user)
 
-        # 按标签筛选
-        tag_ids = self.request.query_params.get("tag_ids", None)
-        if tag_ids:
-            tag_ids = tag_ids.split(",")
-            queryset = queryset.filter(tags__id__in=tag_ids).distinct()
+        # 按分类筛选
+        category = self.request.query_params.get("category", None)
+        if category:
+            queryset = queryset.filter(category_id=category)
 
         # 按标题搜索
         search = self.request.query_params.get("search", None)
@@ -45,6 +44,22 @@ class TaskViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+    def update(self, request, *args, **kwargs):
+        print("Received update request:", request.data)
+        instance = self.get_object()
+        print("Current instance:", {
+            'id': instance.id,
+            'estimated_duration': instance.estimated_duration
+        })
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        print("Updated instance:", {
+            'id': instance.id,
+            'estimated_duration': instance.estimated_duration
+        })
+        return Response(serializer.data)
+
     @action(detail=False, methods=["post"])
     def bulk_delete(self, request):
         task_ids = request.data.get("task_ids", [])
@@ -59,13 +74,9 @@ class TaskViewSet(viewsets.ModelViewSet):
             Task.objects.filter(id=task_id, user=request.user).update(**update)
         return Response(status=status.HTTP_200_OK)
 
-
-class TaskTagViewSet(viewsets.ModelViewSet):
-    serializer_class = TaskTagSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        return TaskTag.objects.filter(user=self.request.user)
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+    @action(detail=True, methods=["post"])
+    def complete(self, request, pk=None):
+        task = self.get_object()
+        task.status = "COMPLETED"
+        task.save()
+        return Response(status=status.HTTP_200_OK)
