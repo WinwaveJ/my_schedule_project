@@ -71,6 +71,7 @@ class Task(models.Model):
     def __str__(self):
         return self.title
 
+
     def clean(self):
         # 只在创建新任务时验证截止时间
         if not self.pk and self.due_date < timezone.now():

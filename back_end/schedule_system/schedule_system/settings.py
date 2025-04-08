@@ -118,7 +118,7 @@ DATABASES = {
         # 'ENGINE': 'django.db.backends.sqlite3',
         # 'NAME': BASE_DIR / 'db.sqlite3',
         "ENGINE": "django.db.backends.mysql",  # 数据库引擎
-        "NAME": "new",  # 数据库名
+        "NAME": "schedule_system",  # 数据库名
         # "USER": "django_user",  # 用户名
         # "PASSWORD": "jackie1004",  # 密码
         "USER": "root",

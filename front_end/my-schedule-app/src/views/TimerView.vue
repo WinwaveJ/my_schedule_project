@@ -1,5 +1,5 @@
 <template>
-  <div class="global-timer">
+  <div class="timer-view">
     <div class="timer-buttons">
       <el-button type="primary" @click="showTaskSelection('stopwatch')">正计时</el-button>
       <el-button type="success" @click="showTaskSelection('pomodoro')">番茄计时</el-button>
@@ -26,9 +26,9 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import TaskSelectionDialog from './TaskSelectionDialog.vue'
-import StopwatchTimer from './StopwatchTimer.vue'
-import PomodoroTimer from './PomodoroTimer.vue'
+import TaskSelectionDialog from '../components/TaskSelectionDialog.vue'
+import StopwatchTimer from '../components/StopwatchTimer.vue'
+import PomodoroTimer from '../components/PomodoroTimer.vue'
 
 const taskSelectionVisible = ref(false)
 const selectedTask = ref('')
@@ -61,15 +61,18 @@ const handleTimerStop = () => {
 </script>
 
 <style scoped>
-.global-timer {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 100;
+.timer-view {
+  position: relative;
+  min-height: 100vh;
+  padding: 20px;
 }
 
 .timer-buttons {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
   display: flex;
   gap: 10px;
+  z-index: 100;
 }
 </style> 
